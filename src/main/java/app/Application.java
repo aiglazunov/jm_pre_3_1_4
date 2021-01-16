@@ -1,7 +1,6 @@
 package app;
 
 import app.model.User;
-import app.service.RestServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
@@ -12,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @SpringBootApplication
 //@Configuration + @EnableAutoConfiguration + @ComponentScan
@@ -23,13 +23,53 @@ public class Application {
                 .web(WebApplicationType.NONE) // .REACTIVE, .SERVLET
                 .run(args);
 
-        RestServiceImpl restService = new RestServiceImpl();
+        final String uri = "http://91.241.64.178:7081/api/users";
 
-        String session = restService.getAllUsers();
-        System.out.print(restService.addUser(new User(3, "James", "Brown",  21), session));
-        System.out.print(restService.changeUser(new User(3, "Thomas", "Shelby",  21), session));
-        System.out.println(restService.deleteUser(new User(3, "Thomas", "Shelby",  21), session));
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntityGet = restTemplate.getForEntity(
+                uri,
+                String.class);
+
+        System.out.println(responseEntityGet.getBody());
+
+        String cookies = (responseEntityGet.getHeaders().get("Set-Cookie").get(0));
+        String[] cookie = cookies.split(";");
+
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Cookie", cookie[0]);
+
+
+        HttpEntity<User> httpEntity1 = new HttpEntity<>(new User(3, "James", "Brown", 20), httpHeaders);
+
+        ResponseEntity<String> responseEntityPost = restTemplate.exchange(
+                uri,
+                HttpMethod.POST,
+                httpEntity1,
+                String.class
+        );
+
+        System.out.println(responseEntityPost.getBody());
+
+        ResponseEntity<String> responseEntityPut = restTemplate.exchange(
+                uri,
+                HttpMethod.PUT,
+                new HttpEntity<>(new User(3, "Thomas", "Shelby", 20), httpHeaders),
+                String.class
+        );
+
+        System.out.println(responseEntityPut.getBody());
+
+        ResponseEntity<String> responseEntityDelete = restTemplate.exchange(
+                uri + "/3",
+                HttpMethod.DELETE,
+                new HttpEntity<>(httpHeaders),
+                String.class
+        );
+
+        System.out.println(responseEntityDelete.getBody());
 
     }
-
 }
+
+
