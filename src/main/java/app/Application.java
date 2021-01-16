@@ -32,6 +32,8 @@ public class Application {
 
         System.out.println(responseEntityGet.getBody());
 
+        StringBuilder sb = new StringBuilder();
+
         String cookies = (responseEntityGet.getHeaders().get("Set-Cookie").get(0));
         String[] cookie = cookies.split(";");
 
@@ -49,7 +51,7 @@ public class Application {
                 String.class
         );
 
-        System.out.println(responseEntityPost.getBody());
+        sb.append(responseEntityPost.getBody());
 
         ResponseEntity<String> responseEntityPut = restTemplate.exchange(
                 uri,
@@ -58,7 +60,7 @@ public class Application {
                 String.class
         );
 
-        System.out.println(responseEntityPut.getBody());
+        sb.append(responseEntityPut.getBody());
 
         ResponseEntity<String> responseEntityDelete = restTemplate.exchange(
                 uri + "/3",
@@ -67,7 +69,9 @@ public class Application {
                 String.class
         );
 
-        System.out.println(responseEntityDelete.getBody());
+        sb.append(responseEntityDelete.getBody());
+
+        System.out.println(sb);
 
     }
 }
